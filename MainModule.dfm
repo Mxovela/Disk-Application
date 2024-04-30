@@ -7,7 +7,7 @@ object UniMainModule: TUniMainModule
     Username = 'root'
     Server = 'localhost'
     Connected = True
-    Left = 392
-    Top = 280
+    Left = 400
+    Top = 360
   end
 end

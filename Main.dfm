@@ -294,6 +294,31 @@ object MainForm: TMainForm
           84C440D240480C240D84C440D24048CCFF0009E7CD0961CDD85A000000004945
           4E44AE426082}
       end
+      object eyeImage: TUniImage
+        Left = 1366
+        Top = 63
+        Width = 18
+        Height = 15
+        Hint = ''
+        Picture.Data = {
+          0954506E67496D61676589504E470D0A1A0A0000000D49484452000000120000
+          000F0806000000E9869F12000000017352474200AECE1CE90000000467414D41
+          0000B18F0BFC6105000000097048597300000EC300000EC301C76FA864000001
+          834944415478DA9DD3CB2B845118C77183106521148AB220C5C24AB1B2B37089
+          889D4B2E5128CA2DB7852265E192084944A12C94851516FE001B2594952491DB
+          18F7EF53BFB7DE26169CFA34339DF7FD9DE79CF38C27E07F231CBDF8C428EE3D
+          FF0809C438EAF0851AAC797E79300129C84492563EC711CAD080174CA3076FFE
+          41D1E842211211EA37FFAA85DE31A0CA7C36E1040523175388B33D23DE35EF1E
+          CF98C41EAE54E58747AB5A792D2ABF1F25A8FE21C842BAB18E2D24ABB2797BB0
+          0D43D8472D6EB1AC30F7F0624CDBB9411A16F5D96C416788458ECA0CC2041A5D
+          153DA21377FABEAD1BCBC6AE05DB83557AF1049538461E36D42F7698C35AD0AA
+          2FD71164A9F248CBB0A010546044AB2D2103A578401F2E5184399CA25E2DE0D3
+          D9EE38A5DB95A66315A9FAED55C88A2E240AF90AB1363940132E6C9BEE5BB1C9
+          0514E8C007ADD1D08E08C428FCC0756B0FCECB4E5098F65BAC875B555DBEBAFB
+          536777886B3CF937971364D73EA346B43FE3AC3559C01F861364B7D3A15537FF
+          1A62E31B525F63A26925B7640000000049454E44AE426082}
+        OnClick = eyeImageClick
+      end
     end
     object leftPanel: TUniPanel
       Left = 1
@@ -311,6 +336,7 @@ object MainForm: TMainForm
         Width = 138
         Height = 521
         Hint = ''
+        Visible = False
         Items.NodeData = {
           0307000000400000000000000000000000FFFFFFFFFFFFFFFF00000000000000
           000000000001114400690073006B002000520065006700690073007400720061
@@ -463,7 +489,7 @@ object MainForm: TMainForm
         TabOrder = 14
       end
       object savebtn: TUniButton
-        Left = 16
+        Left = 7
         Top = 464
         Width = 75
         Height = 25
@@ -473,9 +499,9 @@ object MainForm: TMainForm
         OnClick = savebtnClick
       end
       object submitbtn: TUniButton
-        Left = 160
+        Left = 176
         Top = 464
-        Width = 75
+        Width = 77
         Height = 25
         Hint = ''
         Caption = 'submit'
@@ -499,6 +525,16 @@ object MainForm: TMainForm
         Caption = 'Registration Date'
         TabOrder = 18
       end
+      object clearbtn: TUniButton
+        Left = 96
+        Top = 464
+        Width = 67
+        Height = 25
+        Hint = ''
+        Caption = 'Clear'
+        TabOrder = 19
+        OnClick = clearbtnClick
+      end
     end
     object diskGrid: TUniDBGrid
       Left = 151
@@ -506,6 +542,7 @@ object MainForm: TMainForm
       Width = 987
       Height = 443
       Hint = ''
+      Visible = False
       DataSource = MyDataSource1
       LoadMask.Message = 'Loading data...'
       TabOrder = 4
@@ -537,6 +574,7 @@ object MainForm: TMainForm
       Hint = ''
       Caption = 'Search'
       TabOrder = 7
+      OnClick = searchbtnClick
     end
     object userrad: TUniRadioButton
       Left = 399
@@ -546,6 +584,7 @@ object MainForm: TMainForm
       Hint = ''
       Caption = 'user'
       TabOrder = 8
+      OnClick = userradClick
     end
     object departmentrad: TUniRadioButton
       Left = 518
@@ -555,6 +594,7 @@ object MainForm: TMainForm
       Hint = ''
       Caption = 'department'
       TabOrder = 9
+      OnClick = departmentradClick
     end
     object facultyrad: TUniRadioButton
       Left = 455
@@ -564,6 +604,7 @@ object MainForm: TMainForm
       Hint = ''
       Caption = 'faculty'
       TabOrder = 10
+      OnClick = facultyradClick
     end
     object vehiclemakerad: TUniRadioButton
       Left = 614
@@ -573,16 +614,27 @@ object MainForm: TMainForm
       Hint = ''
       Caption = 'vehicle make'
       TabOrder = 11
+      OnClick = vehiclemakeradClick
+    end
+    object diskregrad: TUniRadioButton
+      Left = 728
+      Top = 136
+      Width = 113
+      Height = 17
+      Hint = ''
+      Caption = 'disk registration'
+      TabOrder = 12
+      OnClick = diskregradClick
     end
   end
   object MyQuery1: TMyQuery
     Connection = UniMainModule.MyConnection1
-    Left = 1088
-    Top = 552
+    Left = 888
+    Top = 504
   end
   object MyDataSource1: TMyDataSource
     DataSet = MyQuery1
-    Left = 1008
-    Top = 552
+    Left = 744
+    Top = 520
   end
 end

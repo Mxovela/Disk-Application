@@ -1,0 +1,445 @@
+unit Main;
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Variants, Classes, Graphics,
+  Controls, Forms, uniGUITypes, uniGUIAbstractClasses,
+  uniGUIClasses, uniGUIRegClasses, uniGUIForm, uniGUIBaseClasses, uniPanel,
+  Vcl.Imaging.pngimage, uniImage, uniLabel, uniButton, uniEdit, uniDBNavigator,
+  uniBasicGrid, uniDBGrid, uniTreeView, uniRadioButton, Data.DB, DBAccess, MemDS, MyAccess;
+
+type
+  TMainForm = class(TUniForm)
+    backgroundPanel: TUniPanel;
+    topPanel: TUniPanel;
+    leftPanel: TUniPanel;
+    rightPanel: TUniPanel;
+    staffedit: TUniEdit;
+    passedit: TUniEdit;
+    loginbtn: TUniButton;
+    stafflbl: TUniLabel;
+    passlbl: TUniLabel;
+    UniImage1: TUniImage;
+    UniTreeView1: TUniTreeView;
+    diskGrid: TUniDBGrid;
+    UniDBNavigator1: TUniDBNavigator;
+    searchedit: TUniEdit;
+    searchbtn: TUniButton;
+    userrad: TUniRadioButton;
+    departmentrad: TUniRadioButton;
+    facultyrad: TUniRadioButton;
+    vehiclemakerad: TUniRadioButton;
+    UniLabel1: TUniLabel;
+    seqedit: TUniEdit;
+    regnoedit: TUniEdit;
+    receiptedit: TUniEdit;
+    bayedit: TUniEdit;
+    regyearedit: TUniEdit;
+    contactedit: TUniEdit;
+    addressedit: TUniEdit;
+    UniLabel2: TUniLabel;
+    UniLabel3: TUniLabel;
+    UniLabel4: TUniLabel;
+    UniLabel5: TUniLabel;
+    UniLabel6: TUniLabel;
+    UniLabel7: TUniLabel;
+    savebtn: TUniButton;
+    submitbtn: TUniButton;
+    regdateedit: TUniEdit;
+    UniLabel8: TUniLabel;
+    MyQuery1: TMyQuery;
+    MyDataSource1: TMyDataSource;
+    clearbtn: TUniButton;
+    eyeImage: TUniImage;
+    procedure loginbtnClick(Sender: TObject);
+    procedure submitbtnClick(Sender: TObject);
+    procedure diskGridCellClick(Column: TUniDBGridColumn);
+    procedure UniTreeView1Change(Sender: TObject; Node: TUniTreeNode);
+    procedure savebtnClick(Sender: TObject);
+    procedure clearbtnClick(Sender: TObject);
+    procedure eyeImageClick(Sender: TObject);
+  private
+    { Private declarations }
+     FPasswordVisible: Boolean; // Track password visibility state
+    procedure UpdatePasswordVisibility;
+    procedure AdjustComponentSizes;
+    procedure AdjustPanelSizes;
+    procedure AdjustGridSizeAndColumns;
+  public
+    { Public declarations }
+  end;
+
+function MainForm: TMainForm;
+
+implementation
+
+{$R *.dfm}
+
+uses
+  uniGUIVars, uniGUIApplication, MainModule;
+
+function MainForm: TMainForm;
+begin
+  Result := TMainForm(UniMainModule.GetFormInstance(TMainForm));
+end;
+
+procedure TMainForm.AdjustComponentSizes;
+begin
+  // Calculate new sizes and positions based on the form's current size
+  AdjustPanelSizes;
+  AdjustGridSizeAndColumns;
+  // Add more adjustments for other components as needed
+end;
+
+procedure TMainForm.AdjustPanelSizes;
+begin
+  // Example: Resize leftPanel and rightPanel
+  leftPanel.Width := Round(ClientWidth * 0.3); // Set leftPanel width to 30% of form width
+  rightPanel.Left := leftPanel.Width + 10;     // Position rightPanel next to leftPanel with spacing
+  rightPanel.Width := ClientWidth - leftPanel.Width - 20; // Adjust rightPanel width
+end;
+
+procedure TMainForm.AdjustGridSizeAndColumns;
+begin
+  // Example: Resize diskGrid and its columns
+  diskGrid.Width := ClientWidth - 20; // Adjust grid width to fill available space with some margin
+
+  // Adjust column widths proportionally
+  diskGrid.Columns[0].Width := Round(diskGrid.Width * 0.3); // Set first column width to 30% of grid width
+  diskGrid.Columns[1].Width := Round(diskGrid.Width * 0.2); // Set second column width to 20% of grid width
+  diskGrid.Columns[2].Width := Round(diskGrid.Width * 0.5); // Set third column width to 50% of grid width
+end;
+
+//LOGIN BUTTON
+  procedure TMainForm.loginbtnClick(Sender: TObject);
+  var
+     Username, Password: string;
+  begin
+    Username := staffedit.Text;
+    Password := passedit.Text;
+
+    // Check if the staff number or password fields are empty
+    if (Username = '') or (Password = '') then
+    begin
+      ShowMessage('Please enter staff number and password as required');
+      Exit;
+    end;
+
+    try
+      // Prepare SQL query to check credentials
+      MyQuery1.SQL.Text := 'SELECT COUNT(*) FROM stafflog WHERE staff_number = :staff_number AND password = :password';
+      MyQuery1.ParamByName('staff_number').AsString := Username;
+      MyQuery1.ParamByName('password').AsString := Password;
+      MyQuery1.Open;
+
+
+      if MyQuery1.Fields[0].AsInteger > 0 then
+      begin
+         ShowMessage('Login Successfully, Welcome');
+        //frontPanel.Visible := False;
+        diskGrid.Visible := True;
+        UniTreeView1.Visible := True;
+      end
+      else
+      begin
+        ShowMessage('Invalid username or password');
+      end;
+    finally
+      MyQuery1.Close;
+    end;
+  end;
+
+
+//SAVE BUTTON
+  procedure TMainForm.savebtnClick(Sender: TObject);
+  var
+    RegSeq, RegNo, ReceiptNo, Bay, RegYear, Contact, Address, RegDate: string;
+  begin
+    // Retrieve data from the form fields
+    RegSeq := seqedit.Text;
+    RegNo := regnoedit.Text;
+    ReceiptNo := receiptedit.Text;
+    Bay := bayedit.Text;
+    RegYear := regyearedit.Text;
+    Contact := contactedit.Text;
+    Address := addressedit.Text;
+    RegDate := regdateedit.Text;
+
+     //Check if any required field is empty (this validation is optional based on your requirements)
+     if (RegSeq = '') or (RegNo = '') or (ReceiptNo = '') or (Bay = '') or
+        (RegYear = '') or (Contact = '') or (Address = '') or (RegDate = '') then
+     begin
+       ShowMessage('Please fill in all fields');
+       Exit;
+     end;
+
+    try
+      // Prepare SQL query to update data in disk_reg table
+      MyQuery1.SQL.Text := 'UPDATE disk_reg SET ' +
+                           'reg_no = :reg_no, ' +
+                           'receipt_no = :receipt_no, ' +
+                           'bay_no = :bay_no, ' +
+                           'reg_year = :reg_year, ' +
+                           'contact_no = :contact_no, ' +
+                           'address = :address, ' +
+                           'reg_date = :reg_date ' +
+                           'WHERE reg_seg = :reg_seg';
+
+      MyQuery1.ParamByName('reg_no').AsString := RegNo;
+      MyQuery1.ParamByName('receipt_no').AsString := ReceiptNo;
+      MyQuery1.ParamByName('bay_no').AsString := Bay;
+      MyQuery1.ParamByName('reg_year').AsString := RegYear;
+      MyQuery1.ParamByName('contact_no').AsString := Contact;
+      MyQuery1.ParamByName('address').AsString := Address;
+      MyQuery1.ParamByName('reg_date').AsString := RegDate;
+      MyQuery1.ParamByName('reg_seg').AsString := RegSeq;
+
+      MyQuery1.ExecSQL;
+
+      // Show message for successful update
+      ShowMessage('Data updated successfully');
+
+      // Refresh the dataset to reflect changes in the grid
+      MyQuery1.Close;
+      MyQuery1.SQL.Text := 'SELECT * FROM disk_reg';
+      MyQuery1.Open;
+
+      // Refresh the grid to display updated data
+      diskGrid.Refresh;
+    except
+      on E: Exception do
+        ShowMessage('Error: ' + E.Message);
+    end;
+  end;
+
+
+//SUBMIT BUTTON
+    procedure TMainForm.submitbtnClick(Sender: TObject);
+    var
+      RegSeq, RegNo, ReceiptNo, Bay, RegYear, Contact, Address, RegDate: string;
+    begin
+      // Retrieve data from the form fields
+      RegSeq := seqedit.Text;
+      RegNo := regnoedit.Text;
+      ReceiptNo := receiptedit.Text;
+      Bay := bayedit.Text;
+      RegYear := regyearedit.Text;
+      Contact := contactedit.Text;
+      Address := addressedit.Text;
+      RegDate := regdateedit.Text;
+
+      // Check if any required field is empty
+      if (RegNo = '') or (ReceiptNo = '') or (Bay = '') or
+         (RegYear = '') or (Contact = '') or (Address = '') or (RegDate = '') then
+      begin
+        ShowMessage('Please fill in all fields');
+        Exit;
+      end;
+
+      try
+        // Prepare SQL query to insert data into disk_reg table
+        MyQuery1.SQL.Text := 'INSERT INTO disk_reg (reg_seg, reg_no, receipt_no, bay_no, reg_year, contact_no, address, reg_date) ' +
+                             'VALUES (:reg_seg, :reg_no, :receipt_no, :bay_no, :reg_year, :contact_no, :address, :reg_date)';
+        MyQuery1.ParamByName('reg_seg').AsString := RegSeq;
+        MyQuery1.ParamByName('reg_no').AsString := RegNo;
+        MyQuery1.ParamByName('receipt_no').AsString := ReceiptNo;
+        MyQuery1.ParamByName('bay_no').AsString := Bay;
+        MyQuery1.ParamByName('reg_year').AsString := RegYear;
+        MyQuery1.ParamByName('contact_no').AsString := Contact;
+        MyQuery1.ParamByName('address').AsString := Address;
+        MyQuery1.ParamByName('reg_date').AsString := RegDate;
+        MyQuery1.ExecSQL;
+
+        // Show message for successful insert
+        ShowMessage('Data inserted successfully');
+
+        // Refresh the dataset to reflect changes in the grid
+        MyQuery1.Close;
+        MyQuery1.SQL.Text := 'SELECT * FROM disk_reg';
+        MyQuery1.Open;
+
+        // Refresh the grid to display updated data
+        diskGrid.Refresh;
+      except
+        on E: Exception do
+          ShowMessage('Error: ' + E.Message);
+      end;
+    end;
+
+
+//TREEVIEW
+
+procedure TMainForm.UniTreeView1Change(Sender: TObject; Node: TUniTreeNode);
+    begin
+      // Check which item in the tree view is selected
+      if Node.Text = 'Disk Registration' then
+      begin
+        try
+          // Prepare SQL query to fetch data from disk_reg table
+          MyQuery1.SQL.Text := 'SELECT * FROM disk_reg';
+          MyQuery1.Open;
+
+          // Refresh the grid to display the fetched data
+          diskGrid.Refresh;
+        except
+          on E: Exception do
+            ShowMessage('Error: ' + E.Message);
+        end;
+      end
+
+      else if  Node.Text = 'Users' then
+        begin
+            try
+            // Prepare SQL query to fetch data from disk_reg table
+            MyQuery1.SQL.Text := 'SELECT * FROM users';
+            MyQuery1.Open;
+
+            // Refresh the grid to display the fetched data
+            diskGrid.Refresh;
+          except
+            on E: Exception do
+              ShowMessage('Error: ' + E.Message);
+          end;
+        end
+
+        else if  Node.Text = 'Faculty' then
+        begin
+            try
+            // Prepare SQL query to fetch data from disk_reg table
+            MyQuery1.SQL.Text := 'SELECT * FROM faculty';
+            MyQuery1.Open;
+
+            // Refresh the grid to display the fetched data
+            diskGrid.Refresh;
+          except
+            on E: Exception do
+              ShowMessage('Error: ' + E.Message);
+          end;
+        end
+
+        else if  Node.Text = 'Department' then
+        begin
+            try
+            // Prepare SQL query to fetch data from disk_reg table
+            MyQuery1.SQL.Text := 'SELECT * FROM department';
+            MyQuery1.Open;
+
+            // Refresh the grid to display the fetched data
+            diskGrid.Refresh;
+          except
+            on E: Exception do
+              ShowMessage('Error: ' + E.Message);
+          end;
+        end
+
+        else if  Node.Text = 'Vehicle Make' then
+        begin
+            try
+            // Prepare SQL query to fetch data from disk_reg table
+            MyQuery1.SQL.Text := 'SELECT * FROM vechmake';
+            MyQuery1.Open;
+
+            // Refresh the grid to display the fetched data
+            diskGrid.Refresh;
+          except
+            on E: Exception do
+              ShowMessage('Error: ' + E.Message);
+          end;
+        end
+
+        else if  Node.Text = 'Vehicle Model' then
+        begin
+            try
+            // Prepare SQL query to fetch data from disk_reg table
+            MyQuery1.SQL.Text := 'SELECT * FROM vechmake';
+            MyQuery1.Open;
+
+            // Refresh the grid to display the fetched data
+            diskGrid.Refresh;
+          except
+            on E: Exception do
+              ShowMessage('Error: ' + E.Message);
+          end;
+        end
+
+         else if  Node.Text = 'Vehicle Colour' then
+        begin
+            try
+            // Prepare SQL query to fetch data from disk_reg table
+            MyQuery1.SQL.Text := 'SELECT * FROM vechcolour';
+            MyQuery1.Open;
+
+            // Refresh the grid to display the fetched data
+            diskGrid.Refresh;
+          except
+            on E: Exception do
+              ShowMessage('Error: ' + E.Message);
+          end;
+        end;
+    end;
+
+
+    //GRID CLICK
+
+procedure TMainForm.clearbtnClick(Sender: TObject);
+begin
+// Clear all input fields
+  seqedit.Text := '';
+  regnoedit.Text := '';
+  receiptedit.Text := '';
+  bayedit.Text := '';
+  regyearedit.Text := '';
+  contactedit.Text := '';
+  addressedit.Text := '';
+  regdateedit.Text := '';
+end;
+
+
+procedure TMainForm.diskGridCellClick(Column: TUniDBGridColumn);
+    begin
+    // Check if a valid row is selected
+      if diskGrid.DataSource.DataSet.RecordCount > 0 then
+        begin
+          // Populate the fields in the right panel with the values of the selected record
+          seqedit.Text := diskGrid.DataSource.DataSet.FieldByName('reg_seg').AsString;
+          regnoedit.Text := diskGrid.DataSource.DataSet.FieldByName('reg_no').AsString;
+          receiptedit.Text := diskGrid.DataSource.DataSet.FieldByName('receipt_no').AsString;
+          bayedit.Text := diskGrid.DataSource.DataSet.FieldByName('bay_no').AsString;
+          regyearedit.Text := diskGrid.DataSource.DataSet.FieldByName('reg_year').AsString;
+          contactedit.Text := diskGrid.DataSource.DataSet.FieldByName('contact_no').AsString;
+          addressedit.Text := diskGrid.DataSource.DataSet.FieldByName('address').AsString;
+          regdateedit.Text := diskGrid.DataSource.DataSet.FieldByName('reg_date').AsString;
+
+      end
+    end;
+
+ //IMAGE EYE
+  procedure TMainForm.eyeImageClick(Sender: TObject);
+  begin
+    // Toggle password visibility
+    FPasswordVisible := not FPasswordVisible;
+    UpdatePasswordVisibility;
+  end;
+
+//PASSWORD VISIBILITY
+  procedure TMainForm.UpdatePasswordVisibility;
+  begin
+    // Update the password edit control's password character based on visibility state
+    if FPasswordVisible then
+      passedit.PasswordChar := #0 // Show plain text (no password char)
+    else
+      passedit.PasswordChar := '*'; // Show password as asterisks
+
+    // Update eye icon image based on visibility state
+    if FPasswordVisible then
+      eyeImage.Picture.LoadFromFile('eye_icon0.png')
+    else
+      eyeImage.Picture.LoadFromFile('eye_icon0.png');
+  end;
+
+initialization
+  RegisterAppFormClass(TMainForm);
+
+end.
+
