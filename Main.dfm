@@ -319,6 +319,17 @@ object MainForm: TMainForm
           1A62E31B525F63A26925B7640000000049454E44AE426082}
         OnClick = eyeImageClick
       end
+      object logoutbtn: TUniButton
+        Left = 1262
+        Top = 72
+        Width = 75
+        Height = 25
+        Hint = ''
+        Visible = False
+        Caption = 'Logout'
+        TabOrder = 8
+        OnClick = logoutbtnClick
+      end
     end
     object leftPanel: TUniPanel
       Left = 1
@@ -625,6 +636,16 @@ object MainForm: TMainForm
       Caption = 'disk registration'
       TabOrder = 12
       OnClick = diskregradClick
+    end
+    object frontPanel: TUniPanel
+      Left = 1
+      Top = 129
+      Width = 1400
+      Height = 527
+      Hint = ''
+      TabOrder = 13
+      Caption = ''
+      Color = clGradientActiveCaption
     end
   end
   object MyQuery1: TMyQuery

@@ -7,7 +7,7 @@ uses
   Controls, Forms, uniGUITypes, uniGUIAbstractClasses,
   uniGUIClasses, uniGUIRegClasses, uniGUIForm, uniGUIBaseClasses, uniPanel,
   Vcl.Imaging.pngimage, uniImage, uniLabel, uniButton, uniEdit, uniDBNavigator,
-  uniBasicGrid, uniDBGrid, uniTreeView, uniRadioButton, Data.DB, DBAccess, MemDS, MyAccess;
+  uniBasicGrid, uniDBGrid, uniTreeView, uniRadioButton, Data.DB, DBAccess, MemDS, MyAccess;                                                                                                                                                                                                                                                                                                           //Mxolisi Ndovela
 
 type
   TMainForm = class(TUniForm)
@@ -53,6 +53,8 @@ type
     clearbtn: TUniButton;
     eyeImage: TUniImage;
     diskregrad: TUniRadioButton;
+    frontPanel: TUniPanel;
+    logoutbtn: TUniButton;
     procedure loginbtnClick(Sender: TObject);
     procedure submitbtnClick(Sender: TObject);
     procedure diskGridCellClick(Column: TUniDBGridColumn);
@@ -66,6 +68,7 @@ type
     procedure departmentradClick(Sender: TObject);
     procedure vehiclemakeradClick(Sender: TObject);
     procedure diskregradClick(Sender: TObject);
+    procedure logoutbtnClick(Sender: TObject);
 
   private
     { Private declarations }
@@ -121,10 +124,17 @@ end;
 
       if MyQuery1.Fields[0].AsInteger > 0 then
       begin
-         ShowMessage('Login Successfully, Welcome');
-        //frontPanel.Visible := False;
+        ShowMessage('Login Successfully, Welcome');
+        loginbtn.Visible := False;
+        staffedit.Visible := False;
+        passedit.Visible := False;
+        stafflbl.Visible := false;
+        passlbl.Visible := False;
+        frontPanel.Visible := False;
+        eyeImage.Visible := False;
         diskGrid.Visible := True;
         UniTreeView1.Visible := True;
+        logoutbtn.Visible := True;
       end
       else
       begin
@@ -135,6 +145,21 @@ end;
     end;
   end;
 
+
+procedure TMainForm.logoutbtnClick(Sender: TObject);
+begin
+   ShowMessage('User logout!');
+        loginbtn.Visible := True;
+        staffedit.Visible := True;
+        passedit.Visible := True;
+        stafflbl.Visible := True;
+        passlbl.Visible := True;
+        frontPanel.Visible := True;
+        eyeImage.Visible := True;
+        diskGrid.Visible := False;
+        UniTreeView1.Visible := False;
+        logoutbtn.Visible := False;
+end;
 
 //SAVE BUTTON
   procedure TMainForm.savebtnClick(Sender: TObject);
@@ -255,7 +280,7 @@ end;
     end;
 
 
-//TREEVIEW
+
  procedure TMainForm.searchbtnClick(Sender: TObject);
 begin
    PerformSearch;
@@ -266,6 +291,7 @@ end;
 procedure TMainForm.PerformSearch;
 var
   SearchValue: string;
+  SearchField: string;
 begin
   // Retrieve the search value from the search edit
   SearchValue := Trim(searchedit.Text);
@@ -276,11 +302,26 @@ begin
     Exit;
   end;
 
-
+  // Determine the search field based on the selected radio button
+  if userrad.Checked then
+    SearchField := 'last_name'
+  else if departmentrad.Checked then
+    SearchField := 'department_name'
+  else if facultyrad.Checked then
+    SearchField := 'faculty_name'
+  else if vehiclemakerad.Checked then
+    SearchField := 'vehicle_make_name'
+    else if diskregrad.Checked then
+    SearchField := 'reg_no'
+  else
   begin
+    ShowMessage('Please select a search category');
+    Exit;
+  end;
+
   try
-    // Prepare SQL query based on the selected radio button
-    MyQuery1.SQL.Text := Format('SELECT * FROM %s WHERE reg_no LIKE :search_value', [FSelectedTable]);
+    // Prepare SQL query based on the selected radio button and search field
+    MyQuery1.SQL.Text := Format('SELECT * FROM %s WHERE %s LIKE :search_value', [FSelectedTable, SearchField]);
     MyQuery1.ParamByName('search_value').AsString := '%' + SearchValue + '%';
     MyQuery1.Open;
 
@@ -289,7 +330,6 @@ begin
   except
     on E: Exception do
       ShowMessage('Error: ' + E.Message);
-  end;
   end;
 end;
 
@@ -492,5 +532,4 @@ procedure TMainForm.diskGridCellClick(Column: TUniDBGridColumn);
 initialization
   RegisterAppFormClass(TMainForm);
 
-end.
-
+end.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  //Mxolisi Ndovela
